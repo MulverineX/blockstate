@@ -1,0 +1,11 @@
+.github/
+
+.pack/
+
+.sandstone/
+
+serial/
+
+node_modules/
+
+sandstone.config.ts
