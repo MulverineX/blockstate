@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { raw, say } from 'sandstone/commands';
-import { MCFunction } from 'sandstone/core';
+import { MCFunction, Tag } from 'sandstone/core';
+import { BLOCKS, LiteralUnion } from 'sandstone/types';
 
 type serial_file = {
   path: string,
@@ -16,12 +17,13 @@ export async function initialize() {
 
   console.log(states.id.length);
 
-  for (const func of states.id as serial_file[]) {
-    if (func.type === 'mcfunction') MCFunction(`blockstate:${func.path}/${func.name}`, () => {
-      for (const cmd of func.value.split('\n')) {
+  for (const file of states.id as serial_file[]) {
+    if (file.type === 'mcfunction') MCFunction(`blockstate:${file.path}/${file.name}`, () => {
+      for (const cmd of file.value.split('\n')) {
         raw(cmd);
       }
-    })
+    });
+    else Tag('blocks', `blockstate:${file.name}`, JSON.parse(file.value).values as LiteralUnion<BLOCKS>[])
   }
 }
 
