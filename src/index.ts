@@ -1,14 +1,31 @@
-import { tellraw } from 'sandstone/commands';
+import fetch from 'node-fetch';
+import { raw, say } from 'sandstone/commands';
 import { MCFunction } from 'sandstone/core';
 
-MCFunction('display_message', () => {
-  tellraw('@a', [
-    '\n========= Congratulations! =========\n\n',
-    { text: ' Sandstone', color: 'gold', bold: true }, ' is ', { text: 'successfully installed.\n\n', color: 'green' },
-    ' Add files to the ', { text: 'src', underlined: true }, ' folder\n',
-    ' and start creating your data pack!\n',
-    '==============', { text: '🏹', color: '#D2691E' }, { text: '⚔', color: '#45ACA5' }, { text: '⛏', color: '#FFD700' }, '==============',
-  ])
-}, {
-  runOnLoad: true,
+type serial_file = {
+  path: string,
+  type: 'mcfunction' | 'group',
+  name: string,
+  value: string
+}
+
+export async function initialize() {
+  const states = await (await fetch('https://raw.githubusercontent.com/MulverineX/smc-blockstate/states/json/1.16.json')).json();
+
+  require('util').inspect.defaultOptions.depth = 0
+
+  console.log(states.id.length);
+
+  for (const func of states.id as serial_file[]) {
+    if (func.type === 'mcfunction') MCFunction(`blockstate:${func.path}/${func.name}`, () => {
+      for (const cmd of func.value.split('\n')) {
+        raw(cmd);
+      }
+    })
+  }
+}
+
+MCFunction('root', async () => {
+  say('foo');
+  await initialize();
 })
